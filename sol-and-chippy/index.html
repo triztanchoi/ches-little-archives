@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adventures of Sol and Chippy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+  .stack{display:flex; flex-direction:column; gap:22px; width:100%; align-items:center;}
+  .panel h2{margin-bottom:10px;}
+  .btn-download{
+    display:inline-block;
+    margin-top:8px;
+    padding:12px 28px;
+    font-family:var(--display);
+    font-size:19px;
+    color:var(--ground);
+    background:var(--gold);
+    border:1px solid var(--gold);
+    border-radius:999px;
+    text-decoration:none;
+    transition:background-color .2s ease, color .2s ease;
+  }
+  .btn-download:hover{background:var(--pollen); border-color:var(--pollen);}
+  .fine{font-size:15px; color:var(--text-soft); margin-top:12px !important;}
+  .steps{
+    text-align:left;
+    margin:0 0 4px;
+    padding-left:1.3em;
+    color:var(--text-soft);
+  }
+  .steps li{margin-bottom:8px;}
+  .about{text-align:left;}
+  .about h2{text-align:center;}
+  @media (prefers-reduced-motion: reduce){ .btn-download{transition:none;} }
+</style>
+</head>
+<body>
+<main class="page">
+  <a class="back" href="../">Back to the hub</a>
+
+  <svg class="hero-lily" viewBox="0 0 84 162" style="width:84px" aria-hidden="true"><use href="#lily-bud" width="84" height="162"/></svg>
+  <h1>Adventures of Sol and Chippy</h1>
+  <p class="sub">Two cats, twelve levels, and one long walk home.</p>
+
+  <div class="stack">
+
+    <section class="panel">
+      <h2>Download for Android</h2>
+      <p>Get the game as an app file and install it on your phone.</p>
+      <a class="btn-download" href="app-solandchippy.apk" download>Download the game</a>
+      <p class="fine">app-solandchippy.apk, about 13 MB</p>
+    </section>
+
+    <section class="panel about">
+      <h2>How to install</h2>
+      <ol class="steps">
+        <li>Tap the download button on your Android phone.</li>
+        <li>Open the file when it finishes. Your phone may ask you to allow installs from your browser or Files app. Allow it for this one install.</li>
+        <li>Tap Install, then open Adventures of Sol and Chippy.</li>
+      </ol>
+      <p class="fine">Your phone shows this warning for any app that doesn't come from the Play Store.</p>
+    </section>
+
+    <section class="panel about">
+      <h2>About the game</h2>
+      <p>You play two cats, Sol and Chippy, through twelve levels. They don't jump the same: Sol jumps higher, and Chippy's jump is shorter.</p>
+      <p>The game is still growing, so some levels may change as it gets updates.</p>
+    </section>
+
+    <section class="panel">
+      <h2>A short message</h2>
+      <p>I made this little game with a lot of love. I hope it makes you smile.</p>
+    </section>
+
+  </div>
+
+  <div class="footer"></div>
+</main>
+<script src="../shared.js"></script>
+</body>
+</html>

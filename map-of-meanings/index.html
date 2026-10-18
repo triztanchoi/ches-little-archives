@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Map of You</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=UnifrakturCook:wght@700&family=Parisienne&display=swap");
+      * {
+        box-sizing: border-box;
+      }
+      :root {
+        --paper: #d7c092;
+        --ink: #483524;
+        --dark: #241c15;
+        --red: #792f2d;
+        --line: #8b6b42;
+      }
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #201d18;
+        color: var(--ink);
+        font-family: "IM Fell English", serif;
+      }
+      body {
+        padding: clamp(8px, 2.5vw, 28px);
+        overflow-x: hidden;
+      }
+      body:before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.14;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      .gate {
+        min-height: calc(100vh - 16px);
+        display: grid;
+        place-items: center;
+      }
+      .gate-card {
+        width: min(530px, 100%);
+        padding: clamp(26px, 6vw, 54px) clamp(22px, 5vw, 45px);
+        text-align: center;
+        background: radial-gradient(ellipse at 45% 25%, #e8d6a8, #c7aa73 85%);
+        border: 2px solid #9a7745;
+        box-shadow:
+          0 0 0 5px #30251a,
+          0 0 0 6px #9a7745,
+          0 20px 70px #0009;
+        position: relative;
+      }
+      .gate-card:before,
+      .gate-card:after {
+        content: "";
+        position: absolute;
+        inset: 9px;
+        border: 1px solid #947349;
+        pointer-events: none;
+      }
+      .gate-card:after {
+        inset: 14px;
+        border: 1px dashed #ad8b58;
+      }
+      .mini-title {
+        font-size: 11px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #765735;
+      }
+      .gate h1 {
+        font-size: clamp(39px, 9vw, 62px);
+        line-height: 0.95;
+        font-weight: 400;
+        margin: 20px 0 12px;
+      }
+      .gate h1 em {
+        font-family: "Parisienne", cursive;
+        color: var(--red);
+        font-size: 0.95em;
+      }
+      .gate p {
+        font-size: 18px;
+        line-height: 1.5;
+        color: #6a5033;
+      }
+      .keyhole {
+        font-size: 30px;
+        color: var(--red);
+        margin: 18px 0;
+      }
+      .password-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 23px;
+        position: relative;
+        z-index: 1;
+      }
+      .password-row input {
+        width: 100%;
+        min-width: 0;
+        background: #f0dfb9d9;
+        border: 1px solid #967449;
+        padding: 13px 12px;
+        color: #35261a;
+        font-size: 16px;
+        outline: none;
+      }
+      .password-row input:focus {
+        box-shadow: 0 0 0 2px #ad8652;
+      }
+      .password-row button {
+        border: 1px solid #9e7544;
+        background: #632f2a;
+        color: #f1dfb7;
+        padding: 0 17px;
+        cursor: pointer;
+      }
+      .error {
+        min-height: 22px;
+        font-size: 14px !important;
+        color: #852c2c !important;
+        margin: 10px 0 0 !important;
+      }
+      .hint {
+        font-size: 12px !important;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #876a43 !important;
+        margin-top: 22px !important;
+      }
+      #mapApp {
+        display: none;
+      }
+      .map {
+        width: min(1250px, 100%);
+        margin: auto;
+        position: relative;
+        min-height: calc(100vh - 40px);
+        overflow: hidden;
+        background: var(--paper);
+        background-image:
+          radial-gradient(ellipse at 18% 12%, #f0dfb7 0, transparent 35%),
+          radial-gradient(ellipse at 90% 83%, #b89962 0, transparent 38%),
+          linear-gradient(105deg, #d6bd8a, #e0cc9c 42%, #c9ae78);
+        box-shadow:
+          0 0 0 5px #33271b,
+          0 0 0 6px #9b7746,
+          0 18px 65px #000a;
+      }
+      .map:before {
+        content: "";
+        position: absolute;
+        inset: 12px;
+        border: 1px solid #8d6b3d;
+        pointer-events: none;
+        z-index: 5;
+      }
+      .map:after {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border: 1px dashed #a88a57;
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0.8;
+      }
+      .map-header {
+        position: relative;
+        text-align: center;
+        padding: 33px 25px 15px;
+        z-index: 2;
+      }
+      .map-header .top {
+        font-size: 10px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #7d603a;
+      }
+      .map-header h1 {
+        font-weight: 400;
+        font-size: clamp(36px, 7vw, 69px);
+        line-height: 0.95;
+        margin: 12px 0 8px;
+        font-family: "UnifrakturCook", serif;
+        color: #4b3423;
+        text-shadow: 1px 1px #ebd6a6;
+      }
+      .map-header p {
+        font-style: italic;
+        margin: 0;
+        font-size: 16px;
+        color: #765735;
+      }
+      .map-header .rule {
+        margin: 16px auto 0;
+        width: min(500px, 80%);
+        height: 1px;
+        background: #a28655;
+      }
+      .map-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 235px;
+        gap: 0;
+        position: relative;
+        z-index: 2;
+      }
+      .terrain {
+        position: relative;
+        min-height: 660px;
+        overflow: hidden;
+        border-right: 1px solid #9f8050;
+      }
+      .terrain svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        min-height: 660px;
+      }
+      .land-label {
+        font-family: "IM Fell English", serif;
+        font-style: italic;
+        fill: #765a37;
+        font-size: 15px;
+        letter-spacing: 1px;
+      }
+      .terrain-label {
+        font-family: "IM Fell English", serif;
+        font-style: italic;
+        fill: #9b7a4c;
+        font-size: 12px;
+        letter-spacing: 2px;
+      }
+      .route {
+        fill: none;
+        stroke: #9c6f4c;
+        stroke-width: 2;
+        stroke-dasharray: 4 7;
+        stroke-linecap: round;
+        opacity: 0.9;
+      }
+      .route2 {
+        fill: none;
+        stroke: #c0a16a;
+        stroke-width: 7;
+        opacity: 0.35;
+      }
+      .river {
+        fill: none;
+        stroke: #8e9c80;
+        stroke-width: 10;
+        opacity: 0.55;
+      }
+      .forest {
+        fill: #73805b;
+        opacity: 0.65;
+      }
+      .marker {
+        cursor: pointer;
+        position: absolute;
+        z-index: 3;
+        transform: translate(-50%, -50%);
+        border: 0;
+        background: transparent;
+        color: #533a25;
+        text-align: center;
+        padding: 3px;
+        min-width: 84px;
+      }
+      .marker .pin {
+        display: block;
+        font-size: 26px;
+        text-shadow: 1px 1px #e9d6a6;
+        transition: transform 0.2s;
+      }
+      .marker .label {
+        display: block;
+        font-size: 13px;
+        line-height: 1.1;
+        background: #d9c291bd;
+        padding: 3px 5px;
+        border-bottom: 1px solid #a98a56;
+      }
+      .marker:hover .pin,
+      .marker:focus .pin {
+        transform: scale(1.25);
+        color: var(--red);
+      }
+      .marker.active .label {
+        background: #7a302c;
+        color: #f2dfb5;
+      }
+      .marker.active .pin {
+        color: #7a302c;
+      }
+      .m1 {
+        left: 17%;
+        top: 28%;
+      }
+      .m2 {
+        left: 45%;
+        top: 17%;
+      }
+      .m3 {
+        left: 70%;
+        top: 33%;
+      }
+      .m4 {
+        left: 31%;
+        top: 57%;
+      }
+      .m5 {
+        left: 58%;
+        top: 72%;
+      }
+      .m6 {
+        left: 83%;
+        top: 83%;
+      }
+      .trail {
+        position: absolute;
+        left: 8%;
+        top: 86%;
+        font-size: 12px;
+        letter-spacing: 7px;
+        color: #8d6743;
+        transform: rotate(-19deg);
+      }
+      .compass {
+        position: absolute;
+        right: 22px;
+        top: 24px;
+        width: 66px;
+        height: 66px;
+        border: 1px solid #a08355;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        color: #805f3b;
+        background: #e0ca97aa;
+        font-size: 28px;
+      }
+      .compass small {
+        position: absolute;
+        top: -13px;
+        font-size: 10px;
+        letter-spacing: 2px;
+      }
+      .side-notes {
+        padding: 27px 20px 22px;
+        background: rgba(180, 143, 83, 0.13);
+        min-height: 660px;
+        display: flex;
+        flex-direction: column;
+      }
+      .side-notes .tiny {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #8a6a3d;
+      }
+      .side-notes h2 {
+        font-weight: 400;
+        font-size: 28px;
+        line-height: 1.05;
+        margin: 10px 0 14px;
+      }
+      .side-notes .intro {
+        font-size: 15px;
+        line-height: 1.5;
+        color: #725334;
+      }
+      .note-card {
+        border-top: 1px solid #ac8a56;
+        padding: 15px 0 13px;
+        margin-top: 7px;
+      }
+      .note-card .num {
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: #916f43;
+      }
+      .note-card h3 {
+        font-size: 21px;
+        font-weight: 400;
+        margin: 5px 0;
+      }
+      .note-card p {
+        font-size: 15px;
+        line-height: 1.42;
+        margin: 0;
+        color: #6c4f31;
+      }
+      .instruction {
+        margin-top: auto;
+        padding-top: 22px;
+        font-style: italic;
+        font-size: 14px;
+        color: #886a40;
+        line-height: 1.5;
+      }
+      .map-footer {
+        text-align: center;
+        padding: 17px 20px 30px;
+        font-size: 13px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #84653c;
+        position: relative;
+        z-index: 2;
+      }
+      .map-footer span {
+        color: #7a302c;
+        font-size: 18px;
+      }
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: #17130fe6;
+        display: none;
+        place-items: center;
+        padding: 20px;
+        z-index: 20;
+      }
+      .modal.show {
+        display: grid;
+      }
+      .modal-card {
+        width: min(470px, 100%);
+        position: relative;
+        text-align: center;
+        padding: 36px 29px;
+        background: radial-gradient(ellipse at top, #efdfb6, #d1b783);
+        border: 2px solid #997444;
+        box-shadow:
+          0 0 0 5px #33271b,
+          0 0 0 6px #a08250;
+      }
+      .modal-card:before {
+        content: "";
+        position: absolute;
+        inset: 9px;
+        border: 1px dashed #a18454;
+        pointer-events: none;
+      }
+      .modal-card .icon {
+        font-size: 31px;
+        color: #7a302c;
+      }
+      .modal-card h2 {
+        font-size: 37px;
+        font-weight: 400;
+        margin: 10px 0;
+      }
+      .modal-card p {
+        font-size: 19px;
+        line-height: 1.6;
+        margin: 0;
+        color: #60482d;
+      }
+      .close {
+        margin-top: 23px;
+        background: #63312a;
+        color: #f2dfb5;
+        border: 1px solid #9b7545;
+        padding: 10px 18px;
+        cursor: pointer;
+        letter-spacing: 1px;
+      }
+      @media (max-width: 760px) {
+        .map-body {
+          grid-template-columns: 1fr;
+        }
+        .terrain {
+          min-height: 560px;
+          border-right: 0;
+          border-bottom: 1px solid #9f8050;
+        }
+        .terrain svg {
+          min-height: 560px;
+        }
+        .side-notes {
+          min-height: auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0 20px;
+          padding: 25px 28px;
+        }
+        .side-notes > .tiny,
+        .side-notes > h2,
+        .side-notes > .intro,
+        .side-notes > .instruction {
+          grid-column: 1/-1;
+        }
+        .note-card {
+          margin-top: 0;
+        }
+        .compass {
+          width: 51px;
+          height: 51px;
+          font-size: 22px;
+          right: 20px;
+          top: 18px;
+        }
+        .m1 {
+          left: 17%;
+          top: 27%;
+        }
+        .m2 {
+          left: 47%;
+          top: 17%;
+        }
+        .m3 {
+          left: 75%;
+          top: 33%;
+        }
+        .m4 {
+          left: 30%;
+          top: 56%;
+        }
+        .m5 {
+          left: 59%;
+          top: 72%;
+        }
+        .m6 {
+          left: 82%;
+          top: 84%;
+        }
+      }
+      @media (max-width: 480px) {
+        body {
+          padding: 8px;
+        }
+        .map {
+          min-height: 0;
+        }
+        .map-header {
+          padding: 31px 24px 15px;
+        }
+        .map-header .top {
+          font-size: 9px;
+          letter-spacing: 2px;
+        }
+        .terrain {
+          min-height: 490px;
+        }
+        .terrain svg {
+          min-height: 490px;
+        }
+        .marker {
+          min-width: 70px;
+        }
+        .marker .pin {
+          font-size: 23px;
+        }
+        .marker .label {
+          font-size: 11px;
+        }
+        .land-label {
+          font-size: 12px;
+        }
+        .side-notes {
+          display: block;
+          padding: 25px;
+        }
+        .note-card {
+          padding: 12px 0;
+        }
+        .password-row {
+          flex-direction: column;
+        }
+        .password-row button {
+          padding: 12px;
+        }
+      }
+      .hub-link {
+        display: inline-block;
+        margin-top: 14px;
+        font-size: 15px;
+        font-style: italic;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #6a4a2a;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        position: relative;
+        z-index: 6;
+      }
+      .hub-link:focus-visible {
+        outline: 2px solid #792f2d;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="gate" id="gate">
+      <div class="gate-card">
+        <div class="mini-title">The Marauder's Map? · Nope, it's YOURS!</div>
+        <div class="keyhole">✧ ⚿ ✧</div>
+        <h1>My map of<br /><em>Cheanelle</em></h1>
+        <p>This map reveals the pathway to my discovery of you.</p>
+        <p><i>Speak the words, and the map shall reveal itself.</i></p>
+        <form id="passwordForm">
+          <div class="password-row">
+            <input
+              id="password"
+              type="text"
+              autocomplete="off"
+              placeholder="Speak the password…"
+              aria-label="Map password"
+              required
+            />
+            <button type="submit">Reveal</button>
+          </div>
+          <p class="error" id="error" aria-live="polite"></p>
+        </form>
+        <p class="hint">Only the one who knows the words may enter</p>
+        <a class="hub-link" href="../">Back to the hub</a>
+      </div>
+    </section>
+
+    <main class="map" id="mapApp">
+      <header class="map-header">
+        <div class="top">Welcome reader · Discover the pathways</div>
+        <h1>My Map of You</h1>
+        <p>
+          Every reason and purpose, leads to another reason why I adore you.
+        </p>
+        <div class="rule"></div>
+      </header>
+      <div class="map-body">
+        <section class="terrain" aria-label="Interactive hand-drawn map">
+          <svg
+            viewBox="0 0 800 700"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern
+                id="dots"
+                width="28"
+                height="28"
+                patternUnits="userSpaceOnUse"
+              >
+                <circle cx="2" cy="2" r="1" fill="#9c7a4b" opacity=".28" />
+              </pattern>
+            </defs>
+            <rect width="800" height="700" fill="url(#dots)" />
+            <path
+              class="river"
+              d="M-30 390 C110 330 105 460 210 415 S320 320 420 380 S530 500 620 445 S720 350 850 390"
+            />
+            <path
+              d="M-20 390 C110 330 105 460 210 415 S320 320 420 380 S530 500 620 445 S720 350 850 390"
+              fill="none"
+              stroke="#d3c99c"
+              stroke-width="3"
+              opacity=".8"
+            />
+            <path
+              class="route2"
+              d="M110 170 C190 200 190 90 300 115 S420 230 500 190 S610 140 650 280 S540 390 470 470 S350 520 290 420 S170 490 210 580 S450 630 600 570 S710 620 730 650"
+            />
+            <path
+              class="route"
+              d="M110 170 C190 200 190 90 300 115 S420 230 500 190 S610 140 650 280 S540 390 470 470 S350 520 290 420 S170 490 210 580 S450 630 600 570 S710 620 730 650"
+            />
+            <path
+              class="route"
+              d="M300 115 C260 230 340 280 470 310 S580 360 470 470"
+            />
+            <path
+              d="M30 80 q80 -30 140 10 t130 -5 M490 65 q60 35 110 0 t150 12 M40 620 q60 -35 120 0 t130 -10"
+              fill="none"
+              stroke="#b49a6b"
+              stroke-width="1.5"
+            />
+            <g class="forest">
+              <path
+                d="M80 235 l-15 30 h30z M80 250 l-20 35 h40z M80 270 v12 h-4 v-12 M115 245 l-13 27 h26z M115 260 l-18 31 h36z M115 282 v11 h-4 v-11"
+              />
+              <path
+                d="M555 475 l-15 30 h30z M555 490 l-20 35 h40z M555 510 v12 h-4 v-12 M600 485 l-13 27 h26z M600 500 l-18 31 h36z M600 522 v11 h-4 v-11"
+              />
+              <path
+                d="M680 80 l-15 30 h30z M680 95 l-20 35 h40z M680 115 v12 h-4 v-12 M720 100 l-13 27 h26z M720 115 l-18 31 h36z M720 137 v11 h-4 v-11"
+              />
+              <path
+                d="M90 500 l-15 30 h30z M90 515 l-20 35 h40z M90 535 v12 h-4 v-12"
+              />
+            </g>
+            <g fill="none" stroke="#9c7b4e" stroke-width="1.5">
+              <path
+                d="M130 130 l15 -28 15 28z M136 130 v18 h18 v-18 M132 148 h26"
+              />
+              <path
+                d="M320 78 l-22 25 h44z M305 103 v19 h30 v-19 M301 122 h38"
+              />
+              <path
+                d="M610 245 l20 -25 20 25 v31 h-40z M624 276 v-19 h13 v19"
+              />
+              <circle cx="290" cy="420" r="22" />
+              <path
+                d="M275 420 q15 -28 30 0 q-15 28 -30 0 M290 398 v44 M268 420 h44"
+              />
+              <path
+                d="M470 450 q-23 -20 0 -39 q23 19 0 39 M470 450 v25 M455 475 h30"
+              />
+              <path
+                d="M695 590 l18 -24 18 24 v26 h-36z M707 616 v-17 h12 v17"
+              />
+            </g>
+            <g class="land-label">
+              <text x="35" y="180">First Moment</text>
+              <text x="245" y="55">Little Excitements</text>
+              <text x="560" y="210">Your Smile</text>
+              <text x="120" y="465">Silly Stories</text>
+              <text x="405" y="525">Safe Place</text>
+              <text x="635" y="555">Always You</text>
+            </g>
+            <g class="terrain-label">
+              <text x="35" y="320"></text>
+              <text x="390" y="680">THE LAND OF LITTLE THINGS</text>
+              <text x="520" y="325" transform="rotate(61 520 325)">
+                RIVER OF MEMORIES
+              </text>
+            </g>
+            <g
+              transform="translate(735 100)"
+              stroke="#896a40"
+              fill="none"
+              stroke-width="1.5"
+            >
+              <circle r="30" />
+              <path d="M0 -25 L7 0 0 25 -7 0 Z M-25 0 L0 -7 25 0 0 7 Z" />
+              <text x="-4" y="-36" class="land-label">N</text>
+            </g>
+            <g fill="#782f2c">
+              <circle cx="110" cy="170" r="5" />
+              <circle cx="300" cy="115" r="5" />
+              <circle cx="650" cy="280" r="5" />
+              <circle cx="290" cy="420" r="5" />
+              <circle cx="470" cy="470" r="5" />
+              <circle cx="730" cy="650" r="5" />
+            </g>
+          </svg>
+          <button class="marker m1" data-note="0" type="button">
+            <span class="pin">⚑</span><span class="label">First Moment</span>
+          </button>
+          <button class="marker m2" data-note="1" type="button">
+            <span class="pin">✧</span
+            ><span class="label">Little Excitements</span>
+          </button>
+          <button class="marker m3" data-note="2" type="button">
+            <span class="pin">♡</span><span class="label">Your Smile</span>
+          </button>
+          <button class="marker m4" data-note="3" type="button">
+            <span class="pin">❦</span><span class="label">Silly Stories</span>
+          </button>
+          <button class="marker m5" data-note="4" type="button">
+            <span class="pin">⌂</span><span class="label">Safe Place</span>
+          </button>
+          <button class="marker m6" data-note="5" type="button">
+            <span class="pin">☆</span><span class="label">Always You</span>
+          </button>
+          <div class="trail">· ˚ · ˚ · ♡ · ˚ ·</div>
+        </section>
+        <aside class="side-notes">
+          <div class="tiny">Random Notes by Me</div>
+          <h2>Places I Keep<br />Coming Back To</h2>
+          <p class="intro">
+            Tap a little symbols on the map to uncover a reason. Each path marks a
+            small thing that has made its home in my heart.
+          </p>
+          <article class="note-card">
+            <div class="num">I · THE FIRST MOMENT</div>
+            <h3>The beginning</h3>
+            <p>
+              If you were to ask me what is my most unforgettable memory of you.
+              That will probably that day where i forst noticed you.
+            </p>
+          </article>
+          <article class="note-card">
+            <div class="num">II · LITTLE EXCITEMENTS</div>
+            <h3>Your little magic</h3>
+            <p>
+              You make my heart do that silly, happy flutter without even
+              trying. I guess it's the reason why i like smiling even more now.
+            </p>
+          </article>
+          <article class="note-card">
+            <div class="num">III · YOUR SMILE</div>
+            <h3>Like sunshines</h3>
+            <p>
+              Your smile can instantly brighten the most ordinary day. I hope that i always
+              give you the reason to bring your beautiful smile.
+            </p>
+          </article>
+          <div class="instruction">I love you my baby</div>
+        </aside>
+      </div>
+      <footer class="map-footer">
+        <span>♥</span> &nbsp; I solemnly swear that I love you &nbsp;
+        <span>♥</span>
+        <br /><a class="hub-link" href="../">Back to the hub</a>
+      </footer>
+    </main>
+
+    <div
+      class="modal"
+      id="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="modal-card">
+        <div class="icon">✧ ❦ ✧</div>
+        <h2 id="modalTitle">A little secret</h2>
+        <p id="modalText"></p>
+        <button class="close" id="closeModal" type="button">
+          Fold this note away
+        </button>
+      </div>
+    </div>
+    <script>
+      const correctPassword = "i solemnly swear that i love you";
+      const form = document.getElementById("passwordForm");
+      const password = document.getElementById("password");
+      const error = document.getElementById("error");
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (password.value.trim().toLocaleLowerCase() === correctPassword) {
+          document.getElementById("gate").style.display = "none";
+          document.getElementById("mapApp").style.display = "block";
+          document.body.style.padding = "clamp(8px,2.5vw,28px)";
+          window.scrollTo(0, 0);
+        } else {
+          error.textContent =
+            "The map remains hidden… try the words from the heart.";
+          password.select();
+        }
+      });
+      const notes = [
+        [
+          "First Moments",
+          "I love that we still talk about our moments that we've already been to, but somehow if i could visit one moment again, it might be the moment when we walked back to bus after having fun on our field trip. ♡",
+        ],
+        [
+          "Little Excitements",
+          "I love how you make me feel excited over the smallest things. Sometimes all it takes is a simple message from you and it instantly makes my whole day better. ✧",
+        ],
+        [
+          "Your Smile",
+          "I love your smile, the real one, the unexpected one, the one that shows up when you are genuinely happy. I hope I get to see it for a million more times. ♡",
+        ],
+        [
+          "Silly Stories",
+          "I love hearing you laugh. I love our silly moments, our jokes, and all the little things that probably seem ordinary to everyone else, but all of it means the world to me. ❦",
+        ],
+        [
+          "Safe Place",
+          "I love how being close to you can make a difficult day feel lighter. I hope you always feel cared for, respected, and safe, being exactly who you are with me. ⌂",
+        ],
+        [
+          "Always You",
+          "Most of all, I love that you are you. There are so many little reasons, and I am still discovering new. If this map had no end, I would like to keep it going, till the end and for the rest of my life. ☆",
+        ],
+      ];
+      const modal = document.getElementById("modal");
+      document.querySelectorAll(".marker").forEach((marker) =>
+        marker.addEventListener("click", () => {
+          const note = notes[Number(marker.dataset.note)];
+          document
+            .querySelectorAll(".marker")
+            .forEach((item) => item.classList.remove("active"));
+          marker.classList.add("active");
+          document.getElementById("modalTitle").textContent = note[0];
+          document.getElementById("modalText").textContent = note[1];
+          modal.classList.add("show");
+        }),
+      );
+      document
+        .getElementById("closeModal")
+        .addEventListener("click", () => modal.classList.remove("show"));
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) modal.classList.remove("show");
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") modal.classList.remove("show");
+      });
+    </script>
+  </body>
+</html>
